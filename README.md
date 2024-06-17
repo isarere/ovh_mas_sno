@@ -98,6 +98,59 @@ Dans cette étape nous allons installer le certificat validé (par letsencrypt) 
 [Document référence](https://www.edouard.bzh/guide-certificat-wildcard-lets-encrypt-acmesh-nginx-ovh/)
 
 ## Générer certificat
-### Solution 1: Générer localement en manuel?
-### Solution 2: Utiliser 
+[README](./setup-ocp-sno/README.md)
 
+
+
+## Lancer l'installation Maximo Application Suite
+### Lancer MAS CLI
+```shell
+podman run --network=host -ti --rm -v /home/whuang:/mnt/home:Z --pull always quay.io/ibmmas/cli
+```
+### Lancer installeur MAS
+Lancer la commande ci-dessous afin de tracer tous les output d'installation dans un fichier log
+```
+mas install | tee exemple-install.log
+```
+**Bon à savoir:** à la fin de l'installation, nous pourrons récupérer la commande d'installation avec tous les paramètres sélectionné pendant la processus interactive. Voici un exemple:
+```shell
+export IBM_ENTITLEMENT_KEY=xxx
+mas install --mas-catalog-version v8-240528-amd64 --accept-license \
+  --license-file /mnt/home/license.dat \
+  --uds-email 'wei.b.huang@capgemini.com' --uds-firstname 'Wei' --uds-lastname 'HUANG' \
+  --storage-rwo 'lvms-vg1' --storage-rwx 'lvms-vg1' --storage-pipeline 'lvms-vg1' --storage-accessmode 'ReadWriteOnce' \
+  --mas-instance-id 'adp' --mas-workspace-id 'mas' --mas-workspace-name 'Demo environment for ADP' \
+  --mas-channel '8.11.x' --non-prod \
+  --manage-channel '8.7.x' \
+  --manage-jdbc 'workspace-application' --manage-components 'base=latest' --manage-demodata \
+  --db2u-channel 'v110509.0' --db2u-manage \
+  --db2u-cpu-request '300m' --db2u-cpu-limit '6000m' --db2u-memory-request '8Gi' --db2u-memory-limit '12Gi' \
+  --db2u-backup-storage 10Gi --db2u-data-storage '20Gi' --db2u-logs-storage '10Gi' --db2u-meta-storage '10Gi' --db2u-temp-storage '10Gi' \
+  --db2u-manage --db2u-manage-type 'db2wh' \
+  --manage-server-bundle-size 'snojms' \
+  --manage-base-language 'EN' --manage-secondary-languages 'FR' \
+  --manage-server-timezone 'GMT'
+```
+
+## Installer le certificat valide pour MAS
+### Générer le certificat pour MAS (core et manage)
+Lancer la commande ci-dessous pour générer le certificat auprès de "letsEncrypt"
+```shell
+cd config-mas
+./00.generateCertificats.sh <mas-instance-name>
+```
+
+A la fin de traitement, vous aurez les chemins de tous les fichiers généré, par exemple:
+```shell
+[Mon Jun 17 21:38:53 CEST 2024] Your cert is in: /home/whuang/.acme.sh/*.adp.apps.cloud.pbs-eam.com/*.adp.apps.cloud.pbs-eam.com.cer
+[Mon Jun 17 21:38:53 CEST 2024] Your cert key is in: /home/whuang/.acme.sh/*.adp.apps.cloud.pbs-eam.com/*.adp.apps.cloud.pbs-eam.com.key
+[Mon Jun 17 21:38:53 CEST 2024] The intermediate CA cert is in: /home/whuang/.acme.sh/*.adp.apps.cloud.pbs-eam.com/ca.cer
+[Mon Jun 17 21:38:53 CEST 2024] And the full chain certs is there: /home/whuang/.acme.sh/*.adp.apps.cloud.pbs-eam.com/fullchain.cer
+```
+
+### Maj le certificat "selfsigned"
+Lancer la commande ci-dessous pour remplacer le certificat de MAS par les fichiers de certificat en local
+```shell
+cd config-mas
+./02
+```

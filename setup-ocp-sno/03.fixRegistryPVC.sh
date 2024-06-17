@@ -1,0 +1,1 @@
+oc apply registryPVC.yaml
