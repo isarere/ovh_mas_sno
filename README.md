@@ -152,5 +152,45 @@ A la fin de traitement, vous aurez les chemins de tous les fichiers généré, p
 Lancer la commande ci-dessous pour remplacer le certificat de MAS par les fichiers de certificat en local
 ```shell
 cd config-mas
-./02
+./01.setCertificat.sh <mas-instance-name> <private-key-path> <ca-path> <public-key-path>
 ```
+
+> Attention au chemin des fichiers certificats, à cause de la caractère **"*"**, merci d'ajouter les **"** pour encapsulter les chemin
+
+**Par exemple:**
+```shell
+./01.setCertificat.sh adp "/home/whuang/.acme.sh/*.adp.apps.cloud.pbs-eam.com/*.adp.apps.cloud.pbs-eam.com.key" "/home/whuang/.acme.sh/*.adp.apps.cloud.pbs-eam.com/ca.cer" "/home/whuang/.acme.sh/*.adp.apps.cloud.pbs-eam.com/*.adp.apps.cloud.pbs-eam.com.cer"
+```
+
+
+## Configurer DBeaver
+Pour se connecter à DB2, il faut utiliser NodePort du service `db2u-engn-svc`
+1. Récupérer le nom de service
+```shell
+oc get svc -n db2u  | grep db2u-engn-svc
+```
+2. identifier NodePort
+```shell
+oc get svc -n db2u <nom-service-db2u-engn-svc> -o jsonpath='{.spec.ports[?(@.name=="legacy-server")].nodePort}'
+```
+3. identifier les autres infos de la connexion DB2 (retirer `%` à la fin de output)
+```shell
+# Récupérer username
+oc get secret <mas-instance>-<mas-workspace>-jdbccfg-workspace-application-binding -n mas-adp-manage -ojson | jq -r '.data.username' | base64 -d
+# Récupérer password
+oc get secret adp-mas-jdbccfg-workspace-application-binding -n mas-adp-manage -ojson | jq -r '.data.password' | base64 -d
+
+# Consulter URL JDBC pour récupérer le nom de base
+oc get secret adp-mas-jdbccfg-workspace-application-binding -n mas-adp-manage -ojson | jq -r '.data.url' | base64 -d
+```
+**Par exemple:**
+```shell
+oc get secret adp-mas-jdbccfg-workspace-application-binding -n mas-adp-manage -ojson | jq -r '.data.username' | base64 -d
+# Récupérer password
+oc get secret adp-mas-jdbccfg-workspace-application-binding -n mas-adp-manage -ojson | jq -r '.data.password' | base64 -d
+
+# Consulter URL JDBC pour récupérer le nom de base
+oc get secret adp-mas-jdbccfg-workspace-application-binding -n mas-adp-manage -ojson | jq -r '.data.url' | base64 -d
+```
+
+[Documentation NodePort](https://docs.openshift.com/container-platform/4.14/networking/configuring_ingress_cluster_traffic/configuring-ingress-cluster-traffic-nodeport.html)
