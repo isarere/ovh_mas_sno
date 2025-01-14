@@ -1,1 +1,1 @@
-~/.acme.sh/acme.sh --renew-all --dnssleep --force --debug
+~/.acme.sh/acme.sh --force --renew-all --dnssleep --debug
