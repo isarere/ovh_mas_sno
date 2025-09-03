@@ -1,0 +1,3 @@
+cd ~/.acme.sh/apps.cloud.pbs-eam.com/
+oc set data secret/letsencrypt-tls -n openshift-ingress --from-file=tls.crt=apps.cloud.pbs-eam.com.cer && oc set data secret/letsencrypt-tls -n openshift-ingress --from-file=tls.key=apps.cloud.pbs-eam.com.key 
+oc set data secret/letsencrypt-tls -n openshift-config --from-file=tls.crt=apps.cloud.pbs-eam.com.cer && oc set data secret/letsencrypt-tls -n openshift-config --from-file=tls.key=apps.cloud.pbs-eam.com.key
